@@ -1,12 +1,6 @@
-from .errors import (
-    DuplicateIDError,
-    InvalidYearError,
-    InvalidRatingError,
-    EmptyFieldError,
-)
+from .errors import DuplicateIDError, InvalidYearError, InvalidRatingError, EmptyFieldError
 
 MovieRecord = tuple[int, str, int, str, float]
-
 
 class MovieTable:
     def __init__(self) -> None:
@@ -34,3 +28,29 @@ class MovieTable:
         new_record = (movie_id, title.strip(), year, genre.strip(), rating)
         self._movies.append(new_record)
         return new_record
+
+    def select_record(
+        self,
+        movie_id: int | None = None,
+        title: str | None = None,
+        year: int | None = None,
+        genre: str | None = None,
+        rating_min: float | None = None,
+    ) -> list[MovieRecord]:
+        if all(v is None for v in [movie_id, title, year, genre, rating_min]):
+            return self._movies.copy()
+
+        result: list[MovieRecord] = []
+        for record in self._movies:
+            if movie_id is not None and record[0] != movie_id:
+                continue
+            if title is not None and record[1] != title:
+                continue
+            if year is not None and record[2] != year:
+                continue
+            if genre is not None and record[3] != genre:
+                continue
+            if rating_min is not None and record[4] < rating_min:
+                continue
+            result.append(record)
+        return result
