@@ -1,11 +1,13 @@
 from .backend.memory import create_record, select_record
 
+
 def _print_menu() -> None:
     print("\n=== Фильмы ===")
     print("1. Добавить запись")
     print("2. Показать все записи")
     print("3. Найти записи по фильтру")
     print("0. Выход")
+
 
 def _read_int(prompt: str) -> int:
     while True:
@@ -14,6 +16,7 @@ def _read_int(prompt: str) -> int:
             return int(raw)
         except ValueError:
             print("Ошибка: введите целое число.")
+
 
 def _add_film() -> None:
     print("\nДобавление записи")
@@ -30,6 +33,7 @@ def _add_film() -> None:
     except ValueError as exc:
         print(f"Ошибка: {exc}")
 
+
 def _print_records(records: list[tuple[int, str, int, str, float]]) -> None:
     if not records:
         print("Записи не найдены.")
@@ -37,9 +41,11 @@ def _print_records(records: list[tuple[int, str, int, str, float]]) -> None:
     for record in records:
         print(record)
 
+
 def _show_all_films() -> None:
     print("\nСписок записей")
     _print_records(select_record())
+
 
 def _read_optional_int(prompt: str) -> int | None:
     while True:
@@ -51,6 +57,7 @@ def _read_optional_int(prompt: str) -> int | None:
         except ValueError:
             print("Ошибка: введите целое число или оставьте поле пустым.")
 
+
 def _find_films_by_filter() -> None:
     print("\nПоиск по фильтру (Enter = пропустить поле)")
 
@@ -58,7 +65,7 @@ def _find_films_by_filter() -> None:
     title = input("title: ").strip() or None
     genre = input("genre: ").strip() or None
     year = _read_optional_int("year: ")
-    
+
     try:
         rating = input("Rating from (0-10): ").strip()
         rating = float(rating) if rating else None
@@ -74,11 +81,13 @@ def _find_films_by_filter() -> None:
         rating=rating,
     )
     _print_records(records)
+
+
 def run():
     while True:
         _print_menu()
         action = input("Выберите действие: ").strip()
-        
+
         if action == "1":
             _add_film()
         elif action == "2":
@@ -90,5 +99,3 @@ def run():
             break
         else:
             print("Неизвестная команда.")
-
-            

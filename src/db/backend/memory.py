@@ -1,5 +1,7 @@
 type FilmRecord = tuple[int, str, int, str, float]
 Film: list[FilmRecord] = []
+
+
 def create_record(
     id: int,
     title: str,
@@ -7,18 +9,16 @@ def create_record(
     genre: str,
     rating: float,
 ) -> FilmRecord:
-    
+
     if year < 1900 or year > 2026:
         raise ValueError("Поле year должно быть от 1900 до 2026.")
-
 
     if rating < 0 or rating > 10:
         raise ValueError("Поле rating не может быть меньше 0 или больше 10.")
 
-
     if any(record[0] == id for record in Film):
         raise ValueError(f"Запись с id={id} уже существует.")
-    
+
     new_record: FilmRecord = (
         id,
         title.strip(),
@@ -28,6 +28,7 @@ def create_record(
     )
     Film.append(new_record)
     return new_record
+
 
 def select_record(
     id: int | None = None,
@@ -48,9 +49,7 @@ def select_record(
 
     result: list[FilmRecord] = []
 
-
     for record in Film:
-
         if id is not None and record[0] != id:
             continue
 
@@ -68,6 +67,4 @@ def select_record(
 
         result.append(record)
 
-
     return result
-
