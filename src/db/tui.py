@@ -18,6 +18,15 @@ def _read_int(prompt: str) -> int:
             print("Ошибка: введите целое число.")
 
 
+def _read_float(prompt: str) -> float:
+    while True:
+        raw = input(prompt).strip()
+        try:
+            return float(raw)
+        except ValueError:
+            print("Ошибка: введите число.")
+
+
 def _add_film() -> None:
     print("\nДобавление записи")
 
@@ -25,7 +34,7 @@ def _add_film() -> None:
     title = input("title: ").strip()
     year = _read_int("year: ")
     genre = input("genre: ").strip()
-    rating = float(input("rating: "))
+    rating = _read_float("rating: ")
 
     try:
         record = create_record(film_id, title, year, genre, rating)

@@ -8,7 +8,7 @@
 - src/db/__main__.py — точка входа
 - src/db/tui.py — консольный интерфейс
 - src/db/backend/__init__.py
-- src/db/backend/memory.py — in‑memory БД (CRUD)
+- src/db/backend/memory.py — in‑memory БД (CR)
 
 ## Функциональность
 
