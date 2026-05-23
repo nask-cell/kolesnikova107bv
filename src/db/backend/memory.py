@@ -1,6 +1,12 @@
-from .errors import DuplicateIDError, InvalidYearError, InvalidRatingError, EmptyFieldError
+from .errors import (
+    DuplicateIDError,
+    InvalidYearError,
+    InvalidRatingError,
+    EmptyFieldError,
+)
 
 MovieRecord = tuple[int, str, int, str, float]
+
 
 class MovieTable:
     def __init__(self) -> None:
@@ -24,13 +30,7 @@ class MovieTable:
             raise EmptyFieldError("Жанр не может быть пустым.")
         if any(record[0] == movie_id for record in self._movies):
             raise DuplicateIDError(f"Запись с id={movie_id} уже существует.")
-        
-        new_record = (
-            movie_id, 
-            title.strip(), 
-            year, 
-            genre.strip(), 
-            rating
-        )
+
+        new_record = (movie_id, title.strip(), year, genre.strip(), rating)
         self._movies.append(new_record)
         return new_record

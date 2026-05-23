@@ -1,10 +1,14 @@
 import unittest
 from src.db.backend.memory import MovieTable
-from src.db.backend.errors import InvalidYearError, InvalidRatingError, DuplicateIDError, EmptyFieldError
+from src.db.backend.errors import (
+    InvalidYearError,
+    InvalidRatingError,
+    DuplicateIDError,
+    EmptyFieldError,
+)
 
 
 class TestMemory(unittest.TestCase):
-    
     def test_movie_table_allocation(self):
         movie_table = MovieTable()
         self.assertIsInstance(movie_table, MovieTable)
