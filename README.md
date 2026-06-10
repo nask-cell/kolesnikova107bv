@@ -1,4 +1,4 @@
-# Лабораторная работа №3
+# Лабораторная работа №4 — Файловая база данных «Фильмы»
 
 **Студент:** Колесникова Анастасия Сергеевна  
 **Группа:** M60-107БВ-25  
@@ -7,26 +7,40 @@
 
 ## Структура проекта
 
-```text
-src/
-├── db/
-│   ├── __init__.py
-│   ├── __main__.py
-│   ├── tui.py
-│   └── backend/
+KOLESNIKOVA107BV/
+│
+├── src/
+│   └── db/
+│       ├── backend/
+│       │   ├── __init__.py
+│       │   ├── database.py
+│       │   ├── errors.py
+│       │   ├── file.py
+│       │   ├── memory.py
+│       │   └── table.py
 │       ├── __init__.py
-│       ├── errors.py
-│       └── memory.py
-tests/
-├── __init__.py
-└── test_memory.py
-README.md
-```
+│       ├── __main__.py
+│       └── tui.py
+│
+├── data/
+│   └── movies.json
+│
+├── tests/
+│   ├── __init__.py
+│   ├── test_file_database.py
+│   └── test_memory.py
+│
+└── README.md
 
 ---
 
 ## Функциональность
 
+· Выбор типа БД при запуске:
+  · In‑memory — данные не сохраняются после выхода
+  · File database — данные сохраняются в data/movies.json
+· Файловое хранение в формате JSON
+· Автоматическое создание таблицы movies при старте
 · Добавление фильма (id, название, год, жанр, рейтинг)
 · Просмотр всех фильмов
 · Поиск с фильтрацией:
@@ -42,34 +56,33 @@ README.md
 · Рейтинг от 0 до 10
 · Запрет дубликатов id
 · Название и жанр не могут быть пустыми
-
-## Дополнительное задание (+1 балл)
-
-· Консольный интерфейс переписан в класс TUI
+· Ошибки работы с файлами (отсутствие, повреждённый JSON)
 
 ---
 
 ## Тестирование
 
-Фреймворк: unittest
-
-Запуск всех тестов:
+-Запуск всех тестов:
 
 ```bash
 python -m unittest
 ```
 
- Запуск с покрытием (pytest):
+-Запуск только тестов файловой БД:
 
 ```bash
-pytest --cov=src.db.backend.memory --cov-report=term-missing
+python -m unittest tests.test_file_database
 ```
 
-Покрытие memory.py — 100%
+-Покрытие backend:
+
+```bash
+pytest --cov=src.db.backend --cov-report=term-missing
+```
 
 ---
 
- Запуск приложения
+## Запуск приложения
 
 ```bash
 python -m src.db

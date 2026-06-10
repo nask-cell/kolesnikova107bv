@@ -1,0 +1,25 @@
+{
+  "columns": [
+    "movie_id",
+    "title",
+    "year",
+    "genre",
+    "rating"
+  ],
+  "records": [
+    {
+      "movie_id": 1,
+      "title": "Матрица",
+      "year": 1999,
+      "genre": "фантастика",
+      "rating": 9.5
+    },
+    {
+      "movie_id": 2,
+      "title": "Кикимора",
+      "year": 2008,
+      "genre": "ужасы",
+      "rating": 7.8
+    }
+  ]
+}
