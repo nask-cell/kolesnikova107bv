@@ -1,5 +1,3 @@
-from typing import Optional, List
-
 from src.db.backend.memory import MovieTable
 from src.db.backend.errors import (
     InvalidYearError,
@@ -20,7 +18,7 @@ class TUI:
         print("3. Найти фильмы по фильтру")
         print("0. Выход")
 
-    def _read_int(self, prompt: str, allow_empty: bool = False) -> Optional[int]:
+    def _read_int(self, prompt: str, allow_empty: bool = False) -> int | None:
         while True:
             try:
                 raw = input(prompt).strip()
@@ -30,7 +28,7 @@ class TUI:
             except ValueError:
                 print("Ошибка: введите целое число.")
 
-    def _read_float(self, prompt: str, allow_empty: bool = False) -> Optional[float]:
+    def _read_float(self, prompt: str, allow_empty: bool = False) -> float | None:
         while True:
             try:
                 raw = input(prompt).strip()
@@ -67,7 +65,7 @@ class TUI:
         except (InvalidYearError, InvalidRatingError, DuplicateIDError, EmptyFieldError) as e:
             print(f"Ошибка: {e}")
 
-    def _print_records(self, records: List) -> None:
+    def _print_records(self, records: list) -> None:
         if not records:
             print("Фильмы не найдены.")
         else:
@@ -120,3 +118,4 @@ class TUI:
 
 if __name__ == "__main__":
     TUI().run()
+    
