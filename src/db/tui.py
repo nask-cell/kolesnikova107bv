@@ -1,15 +1,38 @@
-from src.db.backend.memory import MovieTable
+from src.db.backend.file import FileDatabase
+from src.db.backend.memory import MemoryDatabase
 from src.db.backend.errors import (
-    InvalidYearError,
-    InvalidRatingError,
-    DuplicateIDError,
-    EmptyFieldError,
+    TableNotFoundError,
+    TableAlreadyExistsError,
+    MissingColumnError,
+    UnknownColumnError,
 )
 
 
 class TUI:
     def __init__(self) -> None:
-        self.db = MovieTable()
+        print("\n=== Выбор типа базы данных ===")
+        print("1. In-memory (данные не сохраняются)")
+        print("2. File database (данные сохраняются в файл)")
+
+        choice = input("Введите номер: ").strip()
+        if choice == "2":
+            self.db = FileDatabase("data")
+            print("Используется файловая БД (папка 'data/')")
+        else:
+            self.db = MemoryDatabase()
+            print("Используется in-memory БД (данные не сохранятся)")
+
+        self._init_movies_table()
+
+    def _init_movies_table(self) -> None:
+        """Создаёт таблицу movies, если её ещё нет."""
+        try:
+            self.db.create_table(
+                "movies",
+                ("movie_id", "title", "year", "genre", "rating")
+            )
+        except TableAlreadyExistsError:
+            pass
 
     def _print_menu(self) -> None:
         print("\n=== База данных фильмов ===")
@@ -38,49 +61,44 @@ class TUI:
             except ValueError:
                 print("Ошибка: введите число.")
 
-    def _read_non_empty_str(self, prompt: str) -> str:
-        while True:
-            value = input(prompt).strip()
-            if value:
-                return value
-            print("Ошибка: поле не может быть пустым.")
-
     def _add_movie(self) -> None:
         print("\nДобавление фильма")
         movie_id = self._read_int("id: ")
-        title = self._read_non_empty_str("название: ")
+        title = input("название: ").strip()
         year = self._read_int("год: ")
-        genre = input("жанр: ").strip() or None
+        genre = input("жанр: ").strip()
         rating = self._read_float("рейтинг: ")
 
         try:
-            record = self.db.create_record(
-                movie_id=movie_id,
-                title=title,
-                year=year,
-                genre=genre,
-                rating=rating,
+            self.db.insert_record(
+                "movies",
+                {
+                    "movie_id": movie_id,
+                    "title": title,
+                    "year": year,
+                    "genre": genre,
+                    "rating": rating,
+                }
             )
-            print(f"Фильм добавлен: {record}")
-        except (
-            InvalidYearError,
-            InvalidRatingError,
-            DuplicateIDError,
-            EmptyFieldError,
-        ) as e:
+            print("Фильм добавлен.")
+        except (MissingColumnError, UnknownColumnError) as e:
+            print(f"Ошибка структуры данных: {e}")
+        except Exception as e:
             print(f"Ошибка: {e}")
-
-    def _print_records(self, records: list) -> None:
-        if not records:
-            print("Фильмы не найдены.")
-        else:
-            for record in records:
-                print(record)
 
     def _show_all_movies(self) -> None:
         print("\nВсе фильмы:")
-        records = self.db.select_record()
-        self._print_records(records)
+        try:
+            records = self.db.select_records("movies")
+            if not records:
+                print("Фильмы не найдены.")
+            else:
+                for record in records:
+                    print(f"{record['movie_id']}: {record['title']} ({record['year']}) — {record['genre']}, ★ {record['rating']}")
+        except TableNotFoundError:
+            print("Таблица фильмов не найдена.")
+        except Exception as e:
+            print(f"Ошибка: {e}")
 
     def _find_movies(self) -> None:
         print("\nПоиск по фильтру (Enter чтобы пропустить)")
@@ -90,36 +108,51 @@ class TUI:
         genre = input("жанр: ").strip() or None
         rating_min = self._read_float("минимальный рейтинг: ", allow_empty=True)
 
-        records = self.db.select_record(
-            movie_id=movie_id,
-            title=title,
-            year=year,
-            genre=genre,
-            rating_min=rating_min,
-        )
-        self._print_records(records)
+        filters = {}
+        if movie_id is not None:
+            filters["movie_id"] = movie_id
+        if title is not None:
+            filters["title"] = title
+        if year is not None:filters["year"] = year
+        if genre is not None:
+            filters["genre"] = genre
+        if rating_min is not None:
+            filters["rating"] = rating_min
+
+        try:
+            records = self.db.select_records("movies", **filters)
+            if not records:
+                print("Фильмы не найдены.")
+            else:
+                for record in records:
+                    print(f"{record['movie_id']}: {record['title']} ({record['year']}) — {record['genre']}, ★ {record['rating']}")
+        except TableNotFoundError:
+            print("Таблица фильмов не найдена.")
+        except Exception as e:
+            print(f"Ошибка: {e}")
 
     def run(self) -> None:
-        actions = {
-            "1": self._add_movie,
-            "2": self._show_all_movies,
-            "3": self._find_movies,
-        }
-
         while True:
             self._print_menu()
             choice = input("Выберите действие: ").strip()
 
-            if choice == "0":
+            if choice == "1":
+                self._add_movie()
+            elif choice == "2":
+                self._show_all_movies()
+            elif choice == "3":
+                self._find_movies()
+            elif choice == "0":
                 print("До свидания!")
                 break
-
-            action = actions.get(choice)
-            if action:
-                action()
             else:
                 print("Неверный выбор, попробуйте снова.")
 
 
+def main():
+    app = TUI()
+    app.run()
+
+
 if __name__ == "__main__":
-    TUI().run()
+    main()
