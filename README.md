@@ -7,29 +7,26 @@
 
 ## Структура проекта
 
+```text
 KOLESNIKOVA107BV/
-│
 ├── src/
 │   └── db/
-│       ├── backend/
-│       │   ├── __init__.py
-│       │   ├── database.py
-│       │   ├── errors.py
-│       │   ├── file.py
-│       │   ├── memory.py
-│       │   └── table.py
 │       ├── __init__.py
 │       ├── __main__.py
-│       └── tui.py
-│
+│       ├── tui.py
+│       └── backend/
+│           ├── __init__.py
+│           ├── database.py
+│           ├── errors.py
+│           ├── file.py
+│           ├── memory.py
+│           └── table.py
 ├── data/
 │   └── movies.json
-│
 ├── tests/
 │   ├── __init__.py
 │   ├── test_file_database.py
 │   └── test_memory.py
-│
 └── README.md
 
 ---
