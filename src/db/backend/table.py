@@ -6,7 +6,9 @@ from .errors import MissingColumnError, UnknownColumnError
 class Table:
     """Таблица с фиксированным набором колонок."""
 
-    def __init__(self, columns: tuple[str, ...], records: list[dict[str, Any]] | None = None) -> None:
+    def __init__(
+        self, columns: tuple[str, ...], records: list[dict[str, Any]] | None = None
+    ) -> None:
         self.columns = columns
         self.records: list[dict[str, Any]] = []
 

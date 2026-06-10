@@ -19,9 +19,7 @@ class FileDatabase(Database):
     def _load_table(self, table_name: str) -> Table:
         table_path = self._get_table_path(table_name)
         if not table_path.exists():
-            raise TableNotFoundError(
-                f"Таблица '{table_name}' не существует."
-            )
+            raise TableNotFoundError(f"Таблица '{table_name}' не существует.")
 
         try:
             with table_path.open("r", encoding="utf-8") as file:
@@ -55,9 +53,7 @@ class FileDatabase(Database):
 
     def _deserialize_table(self, data: dict) -> Table:
         if "columns" not in data or "records" not in data:
-            raise InvalidStorageDataError(
-                "Файл таблицы имеет некорректную структуру."
-            )
+            raise InvalidStorageDataError("Файл таблицы имеет некорректную структуру.")
 
         columns = tuple(data["columns"])
         records = data.get("records", [])

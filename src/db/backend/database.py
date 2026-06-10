@@ -10,9 +10,7 @@ class Database(ABC):
 
     def create_table(self, table_name: str, columns: tuple[str, ...]) -> None:
         if self._table_exists(table_name):
-            raise TableAlreadyExistsError(
-                f"Таблица '{table_name}' уже существует."
-            )
+            raise TableAlreadyExistsError(f"Таблица '{table_name}' уже существует.")
 
         self._save_table(table_name, Table(columns))
 

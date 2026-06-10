@@ -28,8 +28,7 @@ class TUI:
         """Создаёт таблицу movies, если её ещё нет."""
         try:
             self.db.create_table(
-                "movies",
-                ("movie_id", "title", "year", "genre", "rating")
+                "movies", ("movie_id", "title", "year", "genre", "rating")
             )
         except TableAlreadyExistsError:
             pass
@@ -78,7 +77,7 @@ class TUI:
                     "year": year,
                     "genre": genre,
                     "rating": rating,
-                }
+                },
             )
             print("Фильм добавлен.")
         except (MissingColumnError, UnknownColumnError) as e:
@@ -94,7 +93,9 @@ class TUI:
                 print("Фильмы не найдены.")
             else:
                 for record in records:
-                    print(f"{record['movie_id']}: {record['title']} ({record['year']}) — {record['genre']}, ★ {record['rating']}")
+                    print(
+                        f"{record['movie_id']}: {record['title']} ({record['year']}) — {record['genre']}, ★ {record['rating']}"
+                    )
         except TableNotFoundError:
             print("Таблица фильмов не найдена.")
         except Exception as e:
@@ -113,7 +114,8 @@ class TUI:
             filters["movie_id"] = movie_id
         if title is not None:
             filters["title"] = title
-        if year is not None:filters["year"] = year
+        if year is not None:
+            filters["year"] = year
         if genre is not None:
             filters["genre"] = genre
         if rating_min is not None:
@@ -125,7 +127,9 @@ class TUI:
                 print("Фильмы не найдены.")
             else:
                 for record in records:
-                    print(f"{record['movie_id']}: {record['title']} ({record['year']}) — {record['genre']}, ★ {record['rating']}")
+                    print(
+                        f"{record['movie_id']}: {record['title']} ({record['year']}) — {record['genre']}, ★ {record['rating']}"
+                    )
         except TableNotFoundError:
             print("Таблица фильмов не найдена.")
         except Exception as e:
