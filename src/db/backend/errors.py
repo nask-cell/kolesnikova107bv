@@ -1,28 +1,44 @@
-class MovieTableError(Exception):
-    """Базовый класс для ошибок, связанных с таблицей Movie."""
-
+class DatabaseError(Exception):
+    """Базовый класс для ошибок базы данных."""
     pass
 
 
-class InvalidYearError(MovieTableError):
-    """Ошибка, возникающая при попытке создать запись с некорректным годом."""
-
+class TableAlreadyExistsError(DatabaseError):
+    """Ошибка, возникающая при попытке создать уже существующую таблицу."""
     pass
 
 
-class InvalidRatingError(MovieTableError):
-    """Ошибка, возникающая при попытке создать запись с некорректным рейтингом."""
-
+class TableNotFoundError(DatabaseError):
+    """Ошибка, возникающая при обращении к несуществующей таблице."""
     pass
 
 
-class DuplicateIDError(MovieTableError):
-    """Ошибка, возникающая при попытке создать запись с уже существующим идентификатором."""
-
+class MissingColumnError(DatabaseError):
+    """Ошибка, возникающая при отсутствии обязательного поля в записи."""
     pass
 
 
-class EmptyFieldError(MovieTableError):
-    """Ошибка, возникающая при попытке создать запись с пустым названием или жанром."""
+class UnknownColumnError(DatabaseError):
+    """Ошибка, возникающая при использовании поля, которого нет в схеме таблицы."""
+    pass
 
+
+class InvalidStorageDataError(DatabaseError):
+    """Ошибка, возникающая при чтении повреждённых данных из файла."""
+    pass
+
+
+class InvalidYearError(DatabaseError):
+    pass
+
+
+class InvalidRatingError(DatabaseError):
+    pass
+
+
+class DuplicateIDError(DatabaseError):
+    pass
+
+
+class EmptyFieldError(DatabaseError):
     pass
