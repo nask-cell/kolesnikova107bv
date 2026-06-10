@@ -1,6 +1,12 @@
-from .errors import DuplicateIDError, InvalidYearError, InvalidRatingError, EmptyFieldError
+from .errors import (
+    DuplicateIDError,
+    InvalidYearError,
+    InvalidRatingError,
+    EmptyFieldError,
+)
 
 MovieRecord = tuple[int, str, int, str, float]
+
 
 class MovieTable:
     def __init__(self) -> None:

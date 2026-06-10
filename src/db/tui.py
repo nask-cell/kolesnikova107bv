@@ -62,7 +62,12 @@ class TUI:
                 rating=rating,
             )
             print(f"Фильм добавлен: {record}")
-        except (InvalidYearError, InvalidRatingError, DuplicateIDError, EmptyFieldError) as e:
+        except (
+            InvalidYearError,
+            InvalidRatingError,
+            DuplicateIDError,
+            EmptyFieldError,
+        ) as e:
             print(f"Ошибка: {e}")
 
     def _print_records(self, records: list) -> None:
@@ -118,4 +123,3 @@ class TUI:
 
 if __name__ == "__main__":
     TUI().run()
-    

@@ -1,6 +1,11 @@
 import unittest
 from src.db.backend.memory import MovieTable
-from src.db.backend.errors import InvalidYearError, InvalidRatingError, DuplicateIDError, EmptyFieldError
+from src.db.backend.errors import (
+    InvalidYearError,
+    InvalidRatingError,
+    DuplicateIDError,
+    EmptyFieldError,
+)
 
 
 class TestMemory(unittest.TestCase):
@@ -65,7 +70,9 @@ class TestMemory(unittest.TestCase):
             with self.subTest(test_data=test_data):
                 with self.assertRaises(EmptyFieldError) as context:
                     self.movie_table.create_record(*test_data)
-                self.assertEqual(str(context.exception), expected_messages[test_data[0]])
+                self.assertEqual(
+                    str(context.exception), expected_messages[test_data[0]]
+                )
 
     def test_create_record_duplicate_id(self):
         test_data_1 = (1, "Avatar", 2009, "Sci-Fi", 7.9)
@@ -116,7 +123,14 @@ class TestMemory(unittest.TestCase):
             {
                 "name": "Filter by genre",
                 "filters": {"genre": "Sci-Fi"},
-                "expected": [test_datas[0], test_datas[1], test_datas[2], test_datas[4], test_datas[6], test_datas[9]],
+                "expected": [
+                    test_datas[0],
+                    test_datas[1],
+                    test_datas[2],
+                    test_datas[4],
+                    test_datas[6],
+                    test_datas[9],
+                ],
             },
             {
                 "name": "Filter by rating (minimum)",
@@ -125,6 +139,8 @@ class TestMemory(unittest.TestCase):
             },
         ]
         for case in cases:
-            with self.subTest(case=case["name"], filters=case["filters"], expected=case["expected"]):
+            with self.subTest(
+                case=case["name"], filters=case["filters"], expected=case["expected"]
+            ):
                 records = self.movie_table.select_record(**case["filters"])
                 self.assertEqual(records, case["expected"])
