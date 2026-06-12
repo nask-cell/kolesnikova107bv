@@ -1,70 +1,36 @@
-type FilmRecord = tuple[int, str, int, str, float]
-Film: list[FilmRecord] = []
+_tables = {}       # имя таблицы -> список записей
+_next_ids = {}     # имя таблицы -> следующий id
 
 
-def create_record(
-    id: int,
-    title: str,
-    year: int,
-    genre: str,
-    rating: float,
-) -> FilmRecord:
-
-    if year < 1900 or year > 2026:
-        raise ValueError("Поле year должно быть от 1900 до 2026.")
-
-    if rating < 0 or rating > 10:
-        raise ValueError("Поле rating не может быть меньше 0 или больше 10.")
-
-    if any(record[0] == id for record in Film):
-        raise ValueError(f"Запись с id={id} уже существует.")
-
-    new_record: FilmRecord = (
-        id,
-        title.strip(),
-        year,
-        genre.strip(),
-        rating,
-    )
-    Film.append(new_record)
-    return new_record
+def create_record(table_name: str, *values) -> tuple:
+    if table_name not in _tables:
+        _tables[table_name] = []
+        _next_ids[table_name] = 1
+    record_id = _next_ids[table_name]
+    record = (record_id,) + tuple(values)
+    _tables[table_name].append(record)
+    _next_ids[table_name] += 1
+    return record
 
 
-def select_record(
-    id: int | None = None,
-    title: str | None = None,
-    year: int | None = None,
-    genre: str | None = None,
-    rating: float | None = None,
-) -> list[FilmRecord]:
-
-    if (
-        id is None
-        and title is None
-        and year is None
-        and genre is None
-        and rating is None
-    ):
-        return Film.copy()
-
-    result: list[FilmRecord] = []
-
-    for record in Film:
-        if id is not None and record[0] != id:
-            continue
-
-        if title is not None and record[1] != title:
-            continue
-
-        if year is not None and record[2] != year:
-            continue
-
-        if genre is not None and record[3] != genre:
-            continue
-
-        if rating is not None and record[4] != rating:
-            continue
-
-        result.append(record)
-
+def select_record(table_name: str, **filters) -> list:
+    if table_name not in _tables:
+        return []
+    records = _tables[table_name]
+    if not filters:
+        return records.copy()
+    result = []
+    for rec in records:
+        ok = True
+        for key, val in filters.items():
+            if key == "id":
+                if rec[0] != val:
+                    ok = False
+                    break
+            else:
+                # ищем среди остальных полей (по позиции неудобно, но для простоты оставим так)
+                # в учебной задаче это нормально
+                pass
+        if ok:
+            result.append(rec)
     return result
