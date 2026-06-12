@@ -1,6 +1,5 @@
-# in-memory storage: dict[table_name, list[records]]
-_tables = {}       # имя таблицы -> список записей
-_next_ids = {}     # имя таблицы -> следующий id
+_tables = {}      
+_next_ids = {}    
 
 
 def create_record(table_name: str, *values) -> tuple:
@@ -30,9 +29,6 @@ def select_record(table_name: str, **filters) -> list:
                     ok = False
                     break
             else:
-                # простая фильтрация по значению (точное совпадение)
-                # ищем ключ в остальных полях (не id)
-                # для универсальности просто проверяем, есть ли значение где-либо в записи
                 found = False
                 for field in rec[1:]:
                     if str(field) == str(val):
