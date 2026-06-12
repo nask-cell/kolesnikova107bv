@@ -87,9 +87,9 @@ class TUI:
                 val = input(f"{col}: ").strip()
                 if val:
                     filters[col] = val
-        
-        # Добавляем специальный фильтр rating_min (для таблицы movies)
-            if self.current_table == "movies":
+            if self.current_table == "movies" and "rating" in [
+                col.lower() for col in table.columns
+            ]:
                 rating_min = input("rating_min (минимальный рейтинг): ").strip()
                 if rating_min:
                     try:
@@ -97,7 +97,7 @@ class TUI:
                     except ValueError:
                         print("Ошибка: рейтинг должен быть числом")
                         return
-        
+
             records = self.db.select_records(self.current_table, **filters)
             if not records:
                 print("Ничего не найдено")

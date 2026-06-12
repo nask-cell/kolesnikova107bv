@@ -1,146 +1,299 @@
 import unittest
-from src.db.backend.memory import MovieTable
+from src.db.backend.memory import MemoryDatabase
 from src.db.backend.errors import (
     InvalidYearError,
     InvalidRatingError,
-    DuplicateIDError,
     EmptyFieldError,
+    DuplicateIDError,
 )
 
 
-class TestMemory(unittest.TestCase):
+class TestMemoryDatabase(unittest.TestCase):
     def setUp(self):
-        self.movie_table = MovieTable()
-        self.assertIsInstance(self.movie_table, MovieTable)
+        self.db = MemoryDatabase()
+        self.db.create_table("movies", ("movie_id", "title", "year", "genre", "rating"))
 
-    def test_create_record(self):
+    def test_insert_record(self):
         cases = [
-            (1, "Avatar", 2009, "Sci-Fi", 7.9),
-            (2, "Interstellar", 2014, "Sci-Fi", 8.6),
-            (3, "Star Wars", 1977, "Sci-Fi", 8.6),
-            (4, "Titanic", 1997, "Romance", 7.9),
-            (5, "The Matrix", 1999, "Sci-Fi", 8.7),
-            (6, "The Wolf of Wall Street", 2013, "Drama", 8.2),
-            (7, "Terminator", 1984, "Sci-Fi", 8.1),
-            (8, "The Walking Dead", 2010, "Horror", 8.1),
-            (9, "2012", 2009, "Disaster", 5.8),
-            (10, "Spider-Man", 2002, "Sci-Fi", 7.4),
-            (11, "The Avengers", 2012, "Sci-Fi", 8.0),
-            (12, "Ice", 2018, "Drama", 6.5),
+            {
+                "movie_id": 1,
+                "title": "Avatar",
+                "year": 2009,
+                "genre": "Sci-Fi",
+                "rating": 7.9,
+            },
+            {
+                "movie_id": 2,
+                "title": "Interstellar",
+                "year": 2014,
+                "genre": "Sci-Fi",
+                "rating": 8.6,
+            },
+            {
+                "movie_id": 3,
+                "title": "Star Wars",
+                "year": 1977,
+                "genre": "Sci-Fi",
+                "rating": 8.6,
+            },
+            {
+                "movie_id": 4,
+                "title": "Titanic",
+                "year": 1997,
+                "genre": "Romance",
+                "rating": 7.9,
+            },
+            {
+                "movie_id": 5,
+                "title": "The Matrix",
+                "year": 1999,
+                "genre": "Sci-Fi",
+                "rating": 8.7,
+            },
+            {
+                "movie_id": 6,
+                "title": "The Wolf of Wall Street",
+                "year": 2013,
+                "genre": "Drama",
+                "rating": 8.2,
+            },
+            {
+                "movie_id": 7,
+                "title": "Terminator",
+                "year": 1984,
+                "genre": "Sci-Fi",
+                "rating": 8.1,
+            },
+            {
+                "movie_id": 8,
+                "title": "The Walking Dead",
+                "year": 2010,
+                "genre": "Horror",
+                "rating": 8.1,
+            },
+            {
+                "movie_id": 9,
+                "title": "2012",
+                "year": 2009,
+                "genre": "Disaster",
+                "rating": 5.8,
+            },
+            {
+                "movie_id": 10,
+                "title": "Spider-Man",
+                "year": 2002,
+                "genre": "Sci-Fi",
+                "rating": 7.4,
+            },
+            {
+                "movie_id": 11,
+                "title": "The Avengers",
+                "year": 2012,
+                "genre": "Sci-Fi",
+                "rating": 8.0,
+            },
+            {
+                "movie_id": 12,
+                "title": "Ice",
+                "year": 2018,
+                "genre": "Drama",
+                "rating": 6.5,
+            },
         ]
-        for test_data in cases:
-            with self.subTest(test_data=test_data):
-                record = self.movie_table.create_record(*test_data)
-                self.assertEqual(record, test_data)
+        for record in cases:
+            with self.subTest(record=record):
+                self.db.insert_record("movies", record)
+                found = self.db.select_records("movies", movie_id=record["movie_id"])
+                self.assertEqual(len(found), 1)
+                self.assertEqual(found[0]["title"], record["title"])
 
-    def test_create_record_invalid_year(self):
+    def test_insert_invalid_year(self):
         cases = [
-            (1, "Old Movie", 1899, "Drama", 5.0),
-            (2, "Future Movie", 2027, "Sci-Fi", 5.0),
+            {
+                "movie_id": 1,
+                "title": "Old",
+                "year": 1899,
+                "genre": "Drama",
+                "rating": 5.0,
+            },
+            {
+                "movie_id": 2,
+                "title": "Future",
+                "year": 2027,
+                "genre": "Sci-Fi",
+                "rating": 5.0,
+            },
         ]
         error_message = "Год должен быть от 1900 до 2026."
-        for test_data in cases:
-            with self.subTest(test_data=test_data):
-                with self.assertRaises(InvalidYearError) as context:
-                    self.movie_table.create_record(*test_data)
-                self.assertEqual(str(context.exception), error_message)
+        for record in cases:
+            with self.subTest(record=record):
+                with self.assertRaises(InvalidYearError) as ctx:
+                    self.db.insert_record("movies", record)
+                self.assertEqual(str(ctx.exception), error_message)
 
-    def test_create_record_invalid_rating(self):
+    def test_insert_invalid_rating(self):
         cases = [
-            (1, "High Rating", 2000, "Drama", 11),
-            (2, "Negative Rating", 2000, "Drama", -1),
+            {
+                "movie_id": 1,
+                "title": "High",
+                "year": 2000,
+                "genre": "Drama",
+                "rating": 11,
+            },
+            {
+                "movie_id": 2,
+                "title": "Negative",
+                "year": 2000,
+                "genre": "Drama",
+                "rating": -1,
+            },
         ]
         error_message = "Рейтинг должен быть от 0 до 10."
-        for test_data in cases:
-            with self.subTest(test_data=test_data):
-                with self.assertRaises(InvalidRatingError) as context:
-                    self.movie_table.create_record(*test_data)
-                self.assertEqual(str(context.exception), error_message)
+        for record in cases:
+            with self.subTest(record=record):
+                with self.assertRaises(InvalidRatingError) as ctx:
+                    self.db.insert_record("movies", record)
+                self.assertEqual(str(ctx.exception), error_message)
 
-    def test_create_record_empty_fields(self):
+    def test_insert_empty_fields(self):
         cases = [
-            (1, "", 2000, "Drama", 5.0),
-            (2, "Title", 2000, "", 5.0),
+            {"movie_id": 1, "title": "", "year": 2000, "genre": "Drama", "rating": 5.0},
+            {"movie_id": 2, "title": "Title", "year": 2000, "genre": "", "rating": 5.0},
         ]
         expected_messages = {
-            1: "Название не может быть пустым.",
-            2: "Жанр не может быть пустым.",
+            1: "Название не может быть пустым",
+            2: "Жанр не может быть пустым",
         }
-        for test_data in cases:
-            with self.subTest(test_data=test_data):
-                with self.assertRaises(EmptyFieldError) as context:
-                    self.movie_table.create_record(*test_data)
+        for record in cases:
+            with self.subTest(record=record):
+                with self.assertRaises(EmptyFieldError) as ctx:
+                    self.db.insert_record("movies", record)
                 self.assertEqual(
-                    str(context.exception), expected_messages[test_data[0]]
+                    str(ctx.exception), expected_messages[record["movie_id"]]
                 )
 
-    def test_create_record_duplicate_id(self):
-        test_data_1 = (1, "Avatar", 2009, "Sci-Fi", 7.9)
-        test_data_2 = (1, "Interstellar", 2014, "Sci-Fi", 8.6)
-        error_message = "Запись с id=1 уже существует."
-        self.movie_table.create_record(*test_data_1)
-        with self.assertRaises(DuplicateIDError) as context:
-            self.movie_table.create_record(*test_data_2)
-        self.assertEqual(str(context.exception), error_message)
+    def test_insert_duplicate_id(self):
+        record1 = {
+            "movie_id": 1,
+            "title": "Avatar",
+            "year": 2009,
+            "genre": "Sci-Fi",
+            "rating": 7.9,
+        }
+        record2 = {
+            "movie_id": 1,
+            "title": "Interstellar",
+            "year": 2014,
+            "genre": "Sci-Fi",
+            "rating": 8.6,
+        }
+        self.db.insert_record("movies", record1)
+        with self.assertRaises(DuplicateIDError) as ctx:
+            self.db.insert_record("movies", record2)
+        self.assertEqual(str(ctx.exception), "Запись с id=1 уже существует")
 
-    def test_select_record(self):
-        test_datas = [
-            (1, "Avatar", 2009, "Sci-Fi", 7.9),
-            (2, "Interstellar", 2014, "Sci-Fi", 8.6),
-            (3, "Star Wars", 1977, "Sci-Fi", 8.6),
-            (4, "Titanic", 1997, "Romance", 7.9),
-            (5, "The Matrix", 1999, "Sci-Fi", 8.7),
-            (6, "The Wolf of Wall Street", 2013, "Drama", 8.2),
-            (7, "Terminator", 1984, "Sci-Fi", 8.1),
-            (8, "The Walking Dead", 2010, "Horror", 8.1),
-            (9, "2012", 2009, "Disaster", 5.8),
-            (10, "Spider-Man", 2002, "Sci-Fi", 7.4),
+    def test_select_records(self):
+        test_data = [
+            {
+                "movie_id": 1,
+                "title": "Avatar",
+                "year": 2009,
+                "genre": "Sci-Fi",
+                "rating": 7.9,
+            },
+            {
+                "movie_id": 2,
+                "title": "Interstellar",
+                "year": 2014,
+                "genre": "Sci-Fi",
+                "rating": 8.6,
+            },
+            {
+                "movie_id": 3,
+                "title": "Star Wars",
+                "year": 1977,
+                "genre": "Sci-Fi",
+                "rating": 8.6,
+            },
+            {
+                "movie_id": 4,
+                "title": "Titanic",
+                "year": 1997,
+                "genre": "Romance",
+                "rating": 7.9,
+            },
+            {
+                "movie_id": 5,
+                "title": "The Matrix",
+                "year": 1999,
+                "genre": "Sci-Fi",
+                "rating": 8.7,
+            },
+            {
+                "movie_id": 6,
+                "title": "The Wolf of Wall Street",
+                "year": 2013,
+                "genre": "Drama",
+                "rating": 8.2,
+            },
+            {
+                "movie_id": 7,
+                "title": "Terminator",
+                "year": 1984,
+                "genre": "Sci-Fi",
+                "rating": 8.1,
+            },
+            {
+                "movie_id": 8,
+                "title": "The Walking Dead",
+                "year": 2010,
+                "genre": "Horror",
+                "rating": 8.1,
+            },
+            {
+                "movie_id": 9,
+                "title": "2012",
+                "year": 2009,
+                "genre": "Disaster",
+                "rating": 5.8,
+            },
+            {
+                "movie_id": 10,
+                "title": "Spider-Man",
+                "year": 2002,
+                "genre": "Sci-Fi",
+                "rating": 7.4,
+            },
         ]
-        for test_data in test_datas:
-            self.movie_table.create_record(*test_data)
+        for record in test_data:
+            self.db.insert_record("movies", record)
 
         cases = [
+            {"filters": {}, "expected": test_data},
+            {"filters": {"movie_id": 1}, "expected": [test_data[0]]},
+            {"filters": {"title": "Interstellar"}, "expected": [test_data[1]]},
+            {"filters": {"year": 2009}, "expected": [test_data[0], test_data[8]]},
             {
-                "name": "Select without filters",
-                "filters": {},
-                "expected": test_datas,
-            },
-            {
-                "name": "Filter by ID",
-                "filters": {"movie_id": 1},
-                "expected": [test_datas[0]],
-            },
-            {
-                "name": "Filter by title",
-                "filters": {"title": "Interstellar"},
-                "expected": [test_datas[1]],
-            },
-            {
-                "name": "Filter by year",
-                "filters": {"year": 2009},
-                "expected": [test_datas[0], test_datas[8]],
-            },
-            {
-                "name": "Filter by genre",
                 "filters": {"genre": "Sci-Fi"},
                 "expected": [
-                    test_datas[0],
-                    test_datas[1],
-                    test_datas[2],
-                    test_datas[4],
-                    test_datas[6],
-                    test_datas[9],
+                    test_data[0],
+                    test_data[1],
+                    test_data[2],
+                    test_data[4],
+                    test_data[6],
+                    test_data[9],
                 ],
             },
             {
-                "name": "Filter by rating (minimum)",
                 "filters": {"rating_min": 8.5},
-                "expected": [test_datas[1], test_datas[2], test_datas[4]],
+                "expected": [test_data[1], test_data[2], test_data[4]],
             },
         ]
         for case in cases:
-            with self.subTest(
-                case=case["name"], filters=case["filters"], expected=case["expected"]
-            ):
-                records = self.movie_table.select_record(**case["filters"])
-                self.assertEqual(records, case["expected"])
+            with self.subTest(filters=case["filters"]):
+                result = self.db.select_records("movies", **case["filters"])
+                self.assertEqual(result, case["expected"])
+
+
+if __name__ == "__main__":
+    unittest.main()

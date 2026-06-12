@@ -19,4 +19,3 @@ class MemoryDatabase(Database):
 
     def _save_table(self, table_name: str, table: Table) -> None:
         self.tables[table_name] = table
-        

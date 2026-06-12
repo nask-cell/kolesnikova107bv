@@ -34,10 +34,10 @@ class Table:
 
     def select_records(self, **filters: Any) -> list[dict[str, Any]]:
         """Возвращает записи, соответствующие всем переданным фильтрам."""
-        # Разрешаем специальные фильтры, которых нет в колонках
         special_filters = {"rating_min"}
         unknown_filters = [
-            key for key in filters
+            key
+            for key in filters
             if key not in self.columns and key not in special_filters
         ]
         if unknown_filters:
@@ -53,16 +53,13 @@ class Table:
             match = True
             for key, value in filters.items():
                 if key == "rating_min":
-                    # поиск по минимальному рейтингу
                     if "rating" not in record or record["rating"] < value:
                         match = False
                         break
                 else:
-                    # точное совпадение для обычных полей
                     if record.get(key) != value:
                         match = False
                         break
             if match:
                 result.append(record.copy())
         return result
-    

@@ -28,8 +28,30 @@ class FileDatabase(Database):
             raise InvalidStorageDataError(
                 "Файл таблицы содержит некорректный JSON."
             ) from error
+        except (OSError, IOError) as error:
+            raise InvalidStorageDataError(
+                f"Ошибка доступа к файлу таблицы '{table_name}': {error}"
+            ) from error
+        if not isinstance(data, dict):
+            raise InvalidStorageDataError(
+                f"Файл таблицы '{table_name}' должен содержать JSON-объект."
+            )
+        if "columns" not in data or "records" not in data:
+            raise InvalidStorageDataError(
+                f"Файл таблицы '{table_name}' имеет некорректную структуру: отсутствуют 'columns' или 'records'."
+            )
+        if not isinstance(data["columns"], list):
+            raise InvalidStorageDataError(
+                f"Поле 'columns' в таблице '{table_name}' должно быть списком."
+            )
+        if not isinstance(data["records"], list):
+            raise InvalidStorageDataError(
+                f"Поле 'records' в таблице '{table_name}' должно быть списком."
+            )
 
-        return self._deserialize_table(data)
+        columns = tuple(data["columns"])
+        records = data.get("records", [])
+        return Table(columns, records)
 
     def _save_table(self, table_name: str, table: Table) -> None:
         table_path = self._get_table_path(table_name)
