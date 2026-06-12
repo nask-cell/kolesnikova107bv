@@ -1,138 +1,137 @@
-from .backend.memory import create_record, select_record
-
-current_table = None
-current_columns = []
+from src.db.backend.memory import MemoryDatabase
+from src.db.backend.file import FileDatabase
 
 
-def _print_menu():
-    print("\n=== Универсальная база данных ===")
-    print("1. Создать таблицу")
-    print("2. Выбрать таблицу")
-    print("3. Добавить запись")
-    print("4. Показать все записи")
-    print("5. Поиск")
-    print("0. Выход")
-
-
-def _create_table():
-    global current_table, current_columns
-    name = input("Имя таблицы: ").strip()
-    cols = input("Колонки через запятую: ").strip()
-    current_columns = [c.strip() for c in cols.split(",")]
-    current_table = name
-    print(f"Таблица '{name}' создана")
-
-
-def _select_table():
-    global current_table, current_columns
-    name = input("Имя таблицы: ").strip()
-    current_table = name
-    records = select_record(name)
-    if records:
-        first_record = records[0][1:]
-        current_columns = [f"col{i}" for i in range(len(first_record))]
-    print(f"Текущая таблица: {name}")
-
-
-def _is_int(val):
-    try:
-        int(val)
-        return True
-    except ValueError:
-        return False
-
-
-def _is_float(val):
-    try:
-        float(val)
-        return True
-    except ValueError:
-        return False
-
-
-def _add_record():
-    if not current_table:
-        print("Сначала создайте или выберите таблицу")
-        return
-    if not current_columns:
-        print("Сначала создайте таблицу с колонками (пункт 1)")
-        return
-
-    print("\nВведите значения:")
-    values = []
-    ok = True
-    for col in current_columns:
-        val = input(f"{col}: ").strip()
-        if col == "year":
-            if not _is_int(val):
-                print(
-                    f"Ошибка: '{val}' не является годом (нужно целое число). Запись не добавлена."
-                )
-                ok = False
-                break
-        elif col == "rating":
-            if not _is_float(val):
-                print(
-                    f"Ошибка: '{val}' не является рейтингом (нужно число). Запись не добавлена."
-                )
-                ok = False
-                break
-        values.append(val)
-
-    if ok:
-        record = create_record(current_table, *values)
-        print("Запись добавлена:", record)
-    else:
-        print("Запись не добавлена из‑за ошибок ввода.")
-
-
-def _show_all():
-    if not current_table:
-        print("Сначала создайте или выберите таблицу")
-        return
-    records = select_record(current_table)
-    if not records:
-        print("Нет записей")
-    else:
-        for r in records:
-            print(r)
-
-
-def _find_records():
-    if not current_table:
-        print("Сначала создайте или выберите таблицу")
-        return
-    print("Поиск (Enter - пропустить поле)")
-    filters = {}
-    for col in current_columns:
-        val = input(f"{col}: ").strip()
-        if val:
-            filters[col] = val
-    result = select_record(current_table, **filters)
-    if not result:
-        print("Ничего не найдено")
-    else:
-        for r in result:
-            print(r)
-
-
-def run():
-    while True:
-        _print_menu()
-        choice = input("Выберите действие: ").strip()
-        if choice == "1":
-            _create_table()
-        elif choice == "2":
-            _select_table()
-        elif choice == "3":
-            _add_record()
-        elif choice == "4":
-            _show_all()
-        elif choice == "5":
-            _find_records()
-        elif choice == "0":
-            print("Выход.")
-            break
+class TUI:
+    def __init__(self) -> None:
+        print("\n=== Выбор типа базы данных ===")
+        print("1. In-memory (данные не сохраняются)")
+        print("2. File database (данные сохраняются в папку data/)")
+        choice = input("Ваш выбор: ").strip()
+        if choice == "2":
+            self.db = FileDatabase()
+            print("Используется файловая БД")
         else:
-            print("Неизвестная команда")
-            
+            self.db = MemoryDatabase()
+            print("Используется in-memory БД")
+        self.current_table = None
+
+    def _print_menu(self) -> None:
+        print("\n=== Универсальная база данных ===")
+        print("1. Создать таблицу")
+        print("2. Выбрать таблицу")
+        print("3. Добавить запись")
+        print("4. Показать все записи")
+        print("5. Поиск")
+        print("0. Выход")
+
+    def _create_table(self) -> None:
+        name = input("Имя таблицы: ").strip()
+        cols = input("Колонки через запятую: ").strip()
+        columns = tuple(c.strip() for c in cols.split(","))
+        try:
+            self.db.create_table(name, columns)
+            self.current_table = name
+            print(f"Таблица '{name}' создана")
+        except Exception as e:
+            print(f"Ошибка: {e}")
+
+    def _select_table(self) -> None:
+        name = input("Имя таблицы: ").strip()
+        try:
+            self.db._load_table(name)
+            self.current_table = name
+            print(f"Текущая таблица: {name}")
+        except Exception as e:
+            print(f"Ошибка: {e}")
+
+    def _add_record(self) -> None:
+        if not self.current_table:
+            print("Сначала создайте или выберите таблицу")
+            return
+        try:
+            table = self.db._load_table(self.current_table)
+            print("Введите значения:")
+            record = {}
+            for col in table.columns:
+                val = input(f"{col}: ").strip()
+                record[col] = val
+            self.db.insert_record(self.current_table, record)
+            print("Запись добавлена")
+        except Exception as e:
+            print(f"Ошибка: {e}")
+
+    def _show_all(self) -> None:
+        if not self.current_table:
+            print("Сначала создайте или выберите таблицу")
+            return
+        try:
+            records = self.db.select_records(self.current_table)
+            if not records:
+                print("Нет записей")
+            else:
+                for r in records:
+                    print(r)
+        except Exception as e:
+            print(f"Ошибка: {e}")
+
+    def _find_records(self) -> None:
+        if not self.current_table:
+            print("Сначала создайте или выберите таблицу")
+            return
+        print("Поиск (Enter - пропустить поле)")
+        filters = {}
+        try:
+            table = self.db._load_table(self.current_table)
+            for col in table.columns:
+                val = input(f"{col}: ").strip()
+                if val:
+                    filters[col] = val
+        
+        # Добавляем специальный фильтр rating_min (для таблицы movies)
+            if self.current_table == "movies":
+                rating_min = input("rating_min (минимальный рейтинг): ").strip()
+                if rating_min:
+                    try:
+                        filters["rating_min"] = float(rating_min)
+                    except ValueError:
+                        print("Ошибка: рейтинг должен быть числом")
+                        return
+        
+            records = self.db.select_records(self.current_table, **filters)
+            if not records:
+                print("Ничего не найдено")
+            else:
+                for r in records:
+                    print(r)
+        except Exception as e:
+            print(f"Ошибка: {e}")
+
+    def run(self) -> None:
+        while True:
+            self._print_menu()
+            choice = input("Выберите действие: ").strip()
+            if choice == "1":
+                self._create_table()
+            elif choice == "2":
+                self._select_table()
+            elif choice == "3":
+                self._add_record()
+            elif choice == "4":
+                self._show_all()
+            elif choice == "5":
+                self._find_records()
+            elif choice == "0":
+                print("Выход.")
+                break
+            else:
+                print("Неизвестная команда")
+
+
+def main():
+    app = TUI()
+    app.run()
+
+
+if __name__ == "__main__":
+    main()

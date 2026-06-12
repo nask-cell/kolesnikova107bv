@@ -33,8 +33,13 @@ class Table:
         self.records.append(record.copy())
 
     def select_records(self, **filters: Any) -> list[dict[str, Any]]:
-        """Возвращает записи, удовлетворяющие всем переданным фильтрам."""
-        unknown_filters = [key for key in filters if key not in self.columns]
+        """Возвращает записи, соответствующие всем переданным фильтрам."""
+        # Разрешаем специальные фильтры, которых нет в колонках
+        special_filters = {"rating_min"}
+        unknown_filters = [
+            key for key in filters
+            if key not in self.columns and key not in special_filters
+        ]
         if unknown_filters:
             raise UnknownColumnError(
                 f"Поле '{unknown_filters[0]}' не определено в структуре таблицы."
@@ -45,7 +50,19 @@ class Table:
 
         result: list[dict[str, Any]] = []
         for record in self.records:
-            if all(record.get(key) == value for key, value in filters.items()):
+            match = True
+            for key, value in filters.items():
+                if key == "rating_min":
+                    # поиск по минимальному рейтингу
+                    if "rating" not in record or record["rating"] < value:
+                        match = False
+                        break
+                else:
+                    # точное совпадение для обычных полей
+                    if record.get(key) != value:
+                        match = False
+                        break
+            if match:
                 result.append(record.copy())
-
         return result
+    
