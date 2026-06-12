@@ -1,5 +1,5 @@
-_tables = {}       # имя таблицы -> список записей
-_next_ids = {}     # имя таблицы -> следующий id
+_tables = {}
+_next_ids = {}
 
 
 def create_record(table_name: str, *values) -> tuple:
@@ -28,8 +28,6 @@ def select_record(table_name: str, **filters) -> list:
                     ok = False
                     break
             else:
-                # ищем среди остальных полей (по позиции неудобно, но для простоты оставим так)
-                # в учебной задаче это нормально
                 pass
         if ok:
             result.append(rec)

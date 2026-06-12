@@ -65,12 +65,16 @@ def _add_record():
         val = input(f"{col}: ").strip()
         if col == "year":
             if not _is_int(val):
-                print(f"Ошибка: '{val}' не является годом (нужно целое число). Запись не добавлена.")
+                print(
+                    f"Ошибка: '{val}' не является годом (нужно целое число). Запись не добавлена."
+                )
                 ok = False
                 break
         elif col == "rating":
             if not _is_float(val):
-                print(f"Ошибка: '{val}' не является рейтингом (нужно число). Запись не добавлена.")
+                print(
+                    f"Ошибка: '{val}' не является рейтингом (нужно число). Запись не добавлена."
+                )
                 ok = False
                 break
         values.append(val)
@@ -131,4 +135,3 @@ def run():
             break
         else:
             print("Неизвестная команда")
-            
